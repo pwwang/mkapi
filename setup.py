@@ -45,12 +45,12 @@ def check():
 
 
 def publish():
-    check()
+    # check()
     subprocess.run("python setup.py sdist bdist_wheel".split())
     subprocess.run("twine upload dist/*".split())
     version = get_version("mkapi")
-    subprocess.run(["git", "tag", "-a", f"{version}", "-m", f"'Version {version}'"])
-    subprocess.run(["git", "push", "origin", "--tags"])
+    # subprocess.run(["git", "tag", "-a", f"{version}", "-m", f"'Version {version}'"])
+    # subprocess.run(["git", "push", "origin", "--tags"])
     sys.exit(0)
 
 

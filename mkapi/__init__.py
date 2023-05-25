@@ -1,4 +1,4 @@
-__version__ = "0.0.15"
+__version__ = "0.0.16"
 
 from mkapi.core.module import get_module
 from mkapi.core.node import get_node
