@@ -33,6 +33,12 @@ def get_object(name: str) -> Any:
             obj = importlib.import_module(module_name)
         except ModuleNotFoundError:
             continue
+        except RecursionError:
+            raise ImportError(
+                f"Cannot import {module_name}, "
+                "check if you can import it manually."
+            ) from None
+
         for attr in names[k:]:
             try:
                 obj = getattr(obj, attr)

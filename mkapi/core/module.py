@@ -80,7 +80,8 @@ def get_members(obj) -> List[Module]:
         if name:
             name = ".".join([obj.__name__, name])
             module = get_module(name)
-            members.append(module)
+            if module is not None:
+                members.append(module)
     return members
 
 
