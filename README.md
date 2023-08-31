@@ -7,7 +7,7 @@ Note that those _fixes_ may not make sense for your case
 ## Install
 ```bash
 pip install mkapi-fix
-# make sure you only have mkapi or mkapi-fix installed
+# make sure you only have mkapi either or mkapi-fix installed
 ```
 
 ## Fixes/Modifications
