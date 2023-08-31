@@ -163,16 +163,17 @@ def _watch_dict(dic, server, builder, config):
             if key in modules:
                 del modules[key]
             module = get_module(key)
-            def build():
-                # trigger markdown file rebuild
-                importlib.reload(module.obj)
-                # trigger html rebuild
-                os.utime(
-                    os.path.abspath(os.path.join(config["docs_dir"], val)),
-                    None
-                )
-                builder()
-            server.watch(module.obj.__file__, build)
+            # def build():
+            #     # trigger markdown file rebuild
+            #     importlib.reload(module.obj)
+            #     # trigger html rebuild
+            #     os.utime(
+            #         os.path.abspath(os.path.join(config["docs_dir"], val)),
+            #         None
+            #     )
+            #     builder()
+            # server.watch(module.obj.__file__, build)
+            server.watch(module.obj.__file__)
         elif isinstance(val, dict):
             _watch_dict(val, server, builder, config)
 
