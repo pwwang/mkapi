@@ -1,6 +1,15 @@
 # Changelog
 
 ## [Unreleased]
+### Fixed
+- Use try-except instead of hasattr for detection of __wrapped__ and __pytest_wrapped__ ([#33](https://github.com/daizutabi/mkapi/issues/33))
+
+## [1.0.14] - 2020-12-20
+### Added
+- Short filter (`short_nav`) for nav items in page mode ([#41](https://github.com/daizutabi/mkapi/issues/41)).
+
+### Changed
+- Packages/modules without docstring are processed if their members have docstring. ([#42](https://github.com/daizutabi/mkapi/issues/42))
 
 ## [1.0.13] - 2020-08-03
 ### Fixed

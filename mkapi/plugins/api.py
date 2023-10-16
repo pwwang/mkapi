@@ -3,7 +3,7 @@ import logging
 import os
 import shutil
 import sys
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from mkapi import utils
 from mkapi.core.module import Module, get_module
@@ -44,32 +44,36 @@ def collect(path: str, docs_dir: str, config_dir, global_filters) -> Tuple[list,
     package_path, filters = utils.split_filters(package_path)
     filters = utils.update_filters(global_filters, filters)
 
-    module = get_module(package_path)
     nav = []
     abs_api_paths = []
     modules: Dict[str, str] = {}
     package = None
 
-    def add_page(module: Module):
+    def add_page(module: Module, package: Optional[str]):
         page_file = module.object.id + ".md"
         abs_path = os.path.join(abs_api_path, page_file)
         abs_api_paths.append(abs_path)
         create_page(abs_path, module, filters)
-        modules[module.object.id] = os.path.join(api_path, page_file)
+        page_name = module.object.id
+        if package and "short_nav" in filters and page_name != package:
+            page_name = page_name[len(package) + 1 :]
+        modules[page_name] = os.path.join(api_path, page_file)
 
         abs_path = os.path.join(abs_api_path, "source", page_file)
         create_source_page(abs_path, module, filters)
 
+    module = get_module(package_path)
     for m in module:
+        # print(m)
         if m.object.kind == "package":
             if package and modules:
                 nav.append({package: modules})
             package = m.object.id
             modules = {}
             if m.docstring or any(s.docstring for s in m.members):
-                add_page(m)
+                add_page(m, package)
         else:
-            add_page(m)
+            add_page(m, package)
     if package and modules:
         nav.append({package: modules})
 

@@ -74,6 +74,9 @@ def get_fullname(obj: Any, name: str) -> str:
             return ""
         obj = getattr(obj, name)
 
+    if isinstance(obj, property):
+        return ""
+
     return ".".join(split_prefix_and_name(obj))
 
 
@@ -207,11 +210,21 @@ def get_origin(obj: Any) -> Any:
         return get_origin(obj.fget)
     if not callable(obj):
         return obj
+    # if hasattr(obj, "__wrapped__"):
+    #     return get_origin(obj.__wrapped__)
+    # if hasattr(obj, "__pytest_wrapped__"):
+    #     return get_origin(obj.__pytest_wrapped__.obj)
     try:
-        if hasattr(obj, "__wrapped__"):
-            return get_origin(obj.__wrapped__)
-        if hasattr(obj, "__pytest_wrapped__"):
-            return get_origin(obj.__pytest_wrapped__.obj)
-    except Exception:
+        wrapped = obj.__wrapped__
+    except AttributeError:
         pass
+    else:
+        return get_origin(wrapped)
+    try:
+        wrapped = obj.__pytest_wrapped__
+    except AttributeError:
+        pass
+    else:
+        return get_origin(wrapped.obj)
+
     return obj

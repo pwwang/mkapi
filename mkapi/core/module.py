@@ -4,7 +4,9 @@ import os
 from dataclasses import dataclass, field
 from typing import Dict, Iterator, List, Optional
 
-from mkapi.core.node import Node, get_node
+from mkapi.core.node import Node
+from mkapi.core.node import get_members as get_node_members
+from mkapi.core.node import get_node
 from mkapi.core.object import get_object
 from mkapi.core.structure import Tree
 
@@ -30,10 +32,13 @@ class Module(Tree):
     def __iter__(self) -> Iterator["Module"]:
         if self.docstring:
             yield self
-        elif self.object.kind == "package" and any(m.docstring for m in self.members):
+        elif self.object.kind in ["package", "module"] and any(
+            m.docstring for m in self.members
+        ):
             yield self
-        for member in self.members:
-            yield from member
+        if self.object.kind == "package":
+            for member in self.members:
+                yield from member
 
     def get_kind(self) -> str:
         if not self.sourcefile or self.sourcefile.endswith("__init__.py"):
@@ -41,9 +46,9 @@ class Module(Tree):
         else:
             return "module"
 
-    def get_members(self) -> List["Module"]:  # type:ignore
+    def get_members(self) -> List:
         if self.object.kind == "module":
-            return []
+            return get_node_members(self.obj)
         else:
             return get_members(self.obj)
 
@@ -82,7 +87,14 @@ def get_members(obj) -> List[Module]:
             module = get_module(name)
             if module is not None:
                 members.append(module)
-    return members
+    packages = []
+    modules = []
+    for member in members:
+        if member.object.kind == "package":
+            packages.append(member)
+        else:
+            modules.append(member)
+    return modules + packages
 
 
 modules: Dict[str, Module] = {}
