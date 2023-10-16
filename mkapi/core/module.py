@@ -87,6 +87,7 @@ def get_members(obj) -> List[Module]:
             module = get_module(name)
             if module is not None:
                 members.append(module)
+
     packages = []
     modules = []
     for member in members:
