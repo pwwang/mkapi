@@ -215,16 +215,11 @@ def get_origin(obj: Any) -> Any:
     # if hasattr(obj, "__pytest_wrapped__"):
     #     return get_origin(obj.__pytest_wrapped__.obj)
     try:
-        wrapped = obj.__wrapped__
-    except AttributeError:
+        if hasattr(obj, "__wrapped__"):
+            return get_origin(obj.__wrapped__)
+        if hasattr(obj, "__pytest_wrapped__"):
+            return get_origin(obj.__pytest_wrapped__.obj)
+    except Exception:
         pass
-    else:
-        return get_origin(wrapped)
-    try:
-        wrapped = obj.__pytest_wrapped__
-    except AttributeError:
-        pass
-    else:
-        return get_origin(wrapped.obj)
 
     return obj
