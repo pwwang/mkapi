@@ -31,6 +31,10 @@ SECTIONS = [
     "Warns",
     "Yield",
     "Yields",
+    "Input",
+    "Output",
+    "Envs",
+    "Requires",
 ]
 
 
@@ -179,7 +183,15 @@ def get_section(name: str, doc: str, style: str) -> Section:
     type = ""
     markdown = ""
     items = []
-    if name in ["Parameters", "Attributes", "Raises"]:
+    if name in [
+        "Parameters",
+        "Attributes",
+        "Raises",
+        "Input",
+        "Output",
+        "Envs",
+        "Requires",
+    ]:
         items = parse_parameters(doc, style)
     elif name in ["Returns", "Yields"]:
         type, markdown = parse_returns(doc, style)
