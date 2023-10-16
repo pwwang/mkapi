@@ -2,11 +2,13 @@
 
 MkapiPlugin is a MkDocs plugin that creates Python API documentation from Docstring.
 """
+import importlib
 import inspect
 import logging
 import os
 import re
 import sys
+from typing import Mapping
 
 import yaml
 from mkdocs.config import config_options
@@ -17,6 +19,7 @@ import mkapi
 import mkapi.plugins.api
 from mkapi.core.object import get_object
 from mkapi.core.page import Page
+from mkapi.core.module import get_module, modules
 
 logger = logging.getLogger("mkdocs")
 global_config = {}
@@ -139,9 +142,40 @@ class MkapiPlugin(BasePlugin):
         for path in ["theme", "templates"]:
             root = os.path.join(os.path.dirname(mkapi.__file__), path)
             server.watch(root, builder)
+        # also watch the source file as well
+        nav = config["nav"]
+        for keypage in nav:
+            for _, page in keypage.items():
+                if not isinstance(page, list):
+                    continue
+                for onepage in page:
+                    if not isinstance(onepage, dict):
+                        continue
+                    _watch_dict(onepage, server, builder, config)
+
         self.__class__.server = server
         return server
 
+def _watch_dict(dic, server, builder, config):
+    for key, val in dic.items():
+        # <module>: api/<module>.md
+        if isinstance(val, str) and val.endswith(f'/{key}.md'):
+            if key in modules:
+                del modules[key]
+            module = get_module(key)
+            # def build():
+            #     # trigger markdown file rebuild
+            #     importlib.reload(module.obj)
+            #     # trigger html rebuild
+            #     os.utime(
+            #         os.path.abspath(os.path.join(config["docs_dir"], val)),
+            #         None
+            #     )
+            #     builder()
+            # server.watch(module.obj.__file__, build)
+            server.watch(module.obj.__file__)
+        elif isinstance(val, dict):
+            _watch_dict(val, server, builder, config)
 
 def clear_prefix(toc, level: int, id: str = ""):
     for toc_item in toc:

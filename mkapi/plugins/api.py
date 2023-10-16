@@ -64,7 +64,7 @@ def collect(path: str, docs_dir: str, config_dir, global_filters) -> Tuple[list,
 
     module = get_module(package_path)
     for m in module:
-        print(m)
+        # print(m)
         if m.object.kind == "package":
             if package and modules:
                 nav.append({package: modules})

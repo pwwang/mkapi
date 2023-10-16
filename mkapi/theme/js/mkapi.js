@@ -6,6 +6,7 @@ function flush() {
   }
 }
 
-$(flush);
+// $(flush);
+document.body.onload = flush;
 
 // $("html").click(flush)

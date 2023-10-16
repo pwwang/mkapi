@@ -116,6 +116,10 @@ class Signature:
         """
         items = []
         for name, (type, description) in get_attributes(self.obj).items():
+            # name could be a tuple
+            # (a, b) = func()
+            if not isinstance(name, str):
+                continue
             if isinstance(type, str) and type:
                 type = resolve_forward_ref(self.obj, type)
             else:
@@ -184,15 +188,18 @@ def to_string(annotation, kind: str = "returns", obj=None) -> str:
     if origin is Union:
         return union(annotation, obj=obj)
     if origin is tuple:
-        args = [to_string(x, obj=obj) for x in annotation.__args__]
+        args = getattr(annotation, '__args__', None)
+        if args:
+            args = [to_string(x, obj=obj) for x in args]
         if args:
             return "(" + ", ".join(args) + ")"
         else:
             return "tuple"
     if origin is dict:
-        if type(annotation.__args__[0]) == TypeVar:
+        args = getattr(annotation, '__args__', None)
+        if not args or type(annotation.__args__[0]) == TypeVar:
             return "dict"
-        args = [to_string(x, obj=obj) for x in annotation.__args__]
+        args = [to_string(x, obj=obj) for x in args]
         if args:
             return "dict(" + ": ".join(args) + ")"
         else:
@@ -302,7 +309,12 @@ def to_string_args(annotation, obj=None) -> str:
             return " ".join([prefix, s])
 
     args = annotation.__args__
-    name = annotation.__origin__.__name__.lower()
+    try:
+        name = annotation.__origin__.__name__.lower()
+    except AttributeError:
+        # When annotation.__origin__ is typing.Literal
+        name = annotation.__origin__._name.lower()
+
     if name == "callable":
         *args, returns = args
         args = ", ".join(to_string(x, obj=obj) for x in args)
@@ -345,7 +357,8 @@ def resolve_forward_ref(obj: Any, name: str) -> str:
     globals = dict(inspect.getmembers(module))
     try:
         type = eval(name, globals)
-    except NameError:
+    # except NameError:
+    except Exception:
         return name
     else:
         return to_string(type)

@@ -15,3 +15,6 @@ tests/docs/site/
 notebooks/
 .env/
 .venv/
+
+.history/
+.vscode/

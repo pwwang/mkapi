@@ -33,8 +33,17 @@ def get_object(name: str) -> Any:
             obj = importlib.import_module(module_name)
         except ModuleNotFoundError:
             continue
+        except RecursionError:
+            raise ImportError(
+                f"Cannot import {module_name}, "
+                "check if you can import it manually."
+            ) from None
+
         for attr in names[k:]:
-            obj = getattr(obj, attr)
+            try:
+                obj = getattr(obj, attr)
+            except AttributeError:
+                ...
         return obj
     raise ValueError(f"Could not find object: {name}")
 
@@ -101,7 +110,7 @@ def split_prefix_and_name(obj: Any) -> Tuple[str, str]:
             prefix, name = module, qualname
         else:
             prefix, _, name = qualname.rpartition(".")
-            prefix = ".".join([module, prefix])
+            prefix = ".".join([module, prefix]) if module else prefix
         if prefix == "__main__":
             prefix = ""
     return prefix, name

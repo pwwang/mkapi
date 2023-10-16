@@ -43,7 +43,10 @@ class Code:
             lines.append("    " + line)
         source = "\n".join(lines)
         self.markdown = f"    :::python\n{source}\n"
-        html = markdown.markdown(self.markdown, extensions=["codehilite"])
+        try:
+            html = markdown.markdown(self.markdown, extensions=["codehilite"])
+        except:
+            html = markdown.markdown(self.markdown)
         self.html = replace(html)
 
     def __repr__(self):

@@ -50,7 +50,7 @@ class Base:
         Args:
             html: HTML output.
         """
-        self.html = html
+        self.html = _support_lists_callback(html)
         if self.callback:
             self.html = self.callback(self)
 
@@ -58,6 +58,46 @@ class Base:
         """Returns a copy of the {class} instance."""
         return self.__class__(name=self.name, markdown=self.markdown)
 
+def _support_lists_callback(html):
+    """
+    # allow lists
+    # Convert this:
+    #
+    # Description:
+    # - item1
+    # - item2
+    #
+    # to:
+    #
+    # Description:
+    # <ul>
+    #   <li>item1</item>
+    #   <li>item2</item>
+    # </ul>
+    """
+    lines = html.splitlines()
+    if not lines:
+        return html
+
+    html = lines[0]
+    list_starts = False
+    for line in lines[1:]:
+        if not list_starts and line[:2] in ('- ', '* '):
+            html += f'<ul><li>{line}'
+            list_starts = True
+        elif not list_starts:
+            html += line + '\n'
+        elif list_starts and line[:2] in ('- ', '* '):
+            html += f'</li><li>{line}'
+        elif list_starts and line[:1] == ' ':
+            html += f'<br />&nbsp;{line}'
+        else:
+        #elif list_starts:
+            html += f'</li></ul>{line}'
+            list_starts = False
+    if list_starts:
+        html += '</li></ul>'
+    return html
 
 @dataclass(repr=False)
 class Inline(Base):

@@ -45,12 +45,12 @@ def check():
 
 
 def publish():
-    check()
+    # check()
     subprocess.run("python setup.py sdist bdist_wheel".split())
     subprocess.run("twine upload dist/*".split())
     version = get_version("mkapi")
-    subprocess.run(["git", "tag", "-a", f"v{version}", "-m", f"'Version {version}'"])
-    subprocess.run(["git", "push", "origin", "--tags"])
+    # subprocess.run(["git", "tag", "-a", f"{version}", "-m", f"'Version {version}'"])
+    # subprocess.run(["git", "push", "origin", "--tags"])
     sys.exit(0)
 
 
@@ -62,13 +62,13 @@ if sys.argv[-1] == "check":
 
 
 setup(
-    name="mkapi",
+    name="mkapi-fix",
     version=get_version("mkapi"),
     description="An Auto API Documentation tool.",
     long_description=long_description,
-    url="https://mkapi.daizutabi.net",
-    author="daizutabi",
-    author_email="daizutabi@gmail.com",
+    url="https://github.com/pwwang/mkapi",
+    author="pwwang",
+    author_email="pwwang@pwwang.com",
     license="MIT",
     packages=get_packages("mkapi") + ["mkapi/templates", "mkapi/theme"],  # FIXME
     include_package_data=True,

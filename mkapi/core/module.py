@@ -74,6 +74,7 @@ def get_members(obj) -> List[Module]:
     root = os.path.dirname(sourcefile)
     paths = [path for path in os.listdir(root) if not path.startswith("_")]
     members = []
+
     for path in paths:
         root_ = os.path.join(root, path)
         name = ""
@@ -84,7 +85,9 @@ def get_members(obj) -> List[Module]:
         if name:
             name = ".".join([obj.__name__, name])
             module = get_module(name)
-            members.append(module)
+            if module is not None:
+                members.append(module)
+
     packages = []
     modules = []
     for member in members:

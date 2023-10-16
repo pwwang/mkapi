@@ -1,5 +1,6 @@
 """This modules provides Node class that has tree structure."""
 import inspect
+import warnings
 from dataclasses import dataclass, field
 from typing import Any, Callable, Iterator, List, Optional
 
@@ -30,7 +31,13 @@ class Node(Tree):
     def __post_init__(self):
         super().__post_init__()
 
-        members = self.members
+        members = []
+        for member in self.members:
+            try:
+                if member not in members:
+                    members.append(member)
+            except Exception as exc:
+                warnings.warn(f"Member {member} skipped due to {exc}")
         if self.object.kind in ["class", "dataclass"] and not self.docstring:
             for member in members:
                 if member.object.name == "__init__" and member.docstring:
@@ -203,10 +210,14 @@ def is_member(obj: Any, name: str = "", sourcefiles: List[str] = None) -> int:
 def get_members(obj: Any) -> List[Node]:
     sourcefiles = get_sourcefiles(obj)
     members = []
-    for name, obj in inspect.getmembers(obj):
-        sourcefile_index = is_member(obj, name, sourcefiles)
-        if sourcefile_index != -1 and not from_object(obj):
-            member = get_node(obj, sourcefile_index)
+    for name, memobj in inspect.getmembers(obj):
+        sourcefile_index = is_member(memobj, name, sourcefiles)
+        if (
+                sourcefile_index != -1 and
+                not from_object(memobj) and
+                memobj is not obj
+        ):
+            member = get_node(memobj, sourcefile_index)
             if member.docstring:
                 members.append(member)
     return sorted(members, key=lambda x: (-x.sourcefile_index, x.lineno))
