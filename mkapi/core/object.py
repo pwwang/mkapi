@@ -106,7 +106,12 @@ def split_prefix_and_name(obj: Any) -> Tuple[str, str]:
     else:
         module = obj.__module__
         qualname = obj.__qualname__
-        if "." not in qualname:
+        if not isinstance(qualname, str):
+            name = getattr(obj, '__name__', '')
+            if not isinstance(name, str):
+                return module or '', repr(obj)
+            prefix = module or ''
+        elif "." not in qualname:  # TypeError: pl.Expr is not iterable
             prefix, name = module, qualname
         else:
             prefix, _, name = qualname.rpartition(".")
